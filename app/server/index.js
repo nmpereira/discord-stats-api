@@ -50,6 +50,29 @@ app.get("/users", async (req, res) => {
     res.status(500).json({ msg: err.message });
   }
 });
+
+app.get("/messagecount/:num", async (req, res) => {
+  let num = req.params.num;
+  console.log(num);
+  try {
+    const users = await UserModel.find({
+      total_messages: { $gte: num },
+    }).select({
+      _id: 0,
+      disc_id: 1,
+      avatar: 1,
+      discriminator: 1,
+      public_flags: 1,
+      user_count: 1,
+      username: 1,
+      total_messages: 1,
+    });
+    res.json({ query: `$gte ${num}`, count: users.length, data: users });
+    console.log("users length", users.length);
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+});
 app.get("/user/:id", async (req, res) => {
   try {
     const users = await getUsersDb();
@@ -60,22 +83,13 @@ app.get("/user/:id", async (req, res) => {
 });
 app.get("/messageCount", async (req, res) => {
   try {
-    const messageCount = await UserModel.find({}).select({
+    const messageCount = await db.UserModel.find({}).select({
       _id: 0,
       disc_id: 1,
       username: 1,
       total_messages: 1,
     });
     res.json(messageCount);
-  } catch (err) {
-    res.status(500).json({ msg: err.message });
-  }
-});
-
-app.get("/messageCount/:id", async (req, res) => {
-  try {
-    const users = await getUsersDb();
-    res.json(users);
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
